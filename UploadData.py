@@ -5,6 +5,7 @@
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
 import time
@@ -31,25 +32,53 @@ iframes = driver.find_elements_by_tag_name('iframe')
 tree_iframe = iframes[0]
 driver.switch_to.frame(tree_iframe)
 
-# root = '//[@id="ft-id-1"]/li/span'
-#
-# element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, root))).click()
-# element.click()
-
-# element = wait.until(EC.element_to_be_clickable((By.XPATH, root)))
-# element.click()
-
-# webdriver.ActionChains(driver).move_to_element(root).click(root).perform()
-
+# expanding the tree
+tree = 'fancytree-node fancytree-folder fancytree-lastsib fancytree-exp-nl fancytree-ico-cf'
+tree_element = driver.find_element_by_xpath('//*[@id="ft-id-1"]/li/span')
+webdriver.ActionChains(driver).move_to_element(tree_element).click(tree_element).perform()
 
 # 3 type of function ( image / QA / text )
-# Entry add -> requirement : meta data, file
+# step :
+# 1. down to under the tree -> 2.Entry add -> 3. fill requirements : meta data, file
 
-# Article_data_1.0.0/image_data_1.0.0
+# < Image >
 # 1.device_data_1.0.0
 # 2.endurance_data_1.0.0
 # 3.IV_curve_1.0.0
 # 4. retention_data_1.0.0
+
+time.sleep(10)
+image_element = driver.find_element_by_xpath('//*[@id="ui-id-1"]/ul/li[1]/span/span[2]')
+webdriver.ActionChains(driver).move_to_element(image_element).click(image_element).perform()
+
+time.sleep(10)
+image_element_2 = driver.find_element_by_xpath('//*[@id="ui-id-2"]/ul/li[1]/span/span[2]')
+webdriver.ActionChains(driver).move_to_element(image_element_2).click(image_element_2).perform()
+
+# Entry Button
+# go to default iframe -> entry iframe -> click entry botton
+driver.switch_to.default_content()
+entry_frame = iframes[1]
+driver.switch_to.frame(entry_frame)
+
+# hit the button
+# button tag 2개고, id값 새로고침 할 때마다 바뀜 (Xpath, id값 절대 쓰면 X)
+time.sleep(10)
+entry_buttons = driver.find_elements_by_tag_name('Button')
+ActionChains(driver).move_to_element(entry_buttons[1]).click(entry_buttons[1]).perform()
+
+# method for refreshing to the tree iframe
+def refresh_to_tree(tree_iframe, tree_element):
+    driver.switch_to.default_content()
+    driver.switch_to.frame(tree_iframe)
+    webdriver.ActionChains(driver).move_to_element(tree_element).click(tree_element).perform()
+
+
+# element = wait.until(EC.element_to_be_clickable((By.XPATH, root)))
+# element.click()
+# element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, tree))).click()
+# //*[@id="ui-id-1"]/ul/li[1]/span/span[2]
+
 # def imageUpload():
 
 # QA_sheet_1.0.0/QA_data_1.0.0
