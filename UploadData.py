@@ -9,6 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
 import time
+import os
 
 url = "https://www.station.re.kr/group/kriss-materials-data-center/data-management"
 
@@ -66,6 +67,9 @@ driver.switch_to.frame(entry_frame)
 time.sleep(10)
 entry_buttons = driver.find_elements_by_tag_name('Button')
 ActionChains(driver).move_to_element(entry_buttons[1]).click(entry_buttons[1]).perform()
+
+# file 선택
+driver.find_element_by_id("_OSPVisualizing_analyzer_DataInfo_dataFile").send_keys(os.getcwd()+"/Data/word.csv")
 
 # method for refreshing to the tree iframe
 def refresh_to_tree(tree_iframe, tree_element):
