@@ -22,25 +22,24 @@ driver.find_element_by_id('_com_liferay_login_web_portlet_LoginPortlet_password'
 driver.find_element_by_css_selector('button.gradient-btn.col-md-12.h-100.border-0').click()
 
 # after login, switch to iframe
+# there are two iframes(1. file_tree / 2. data info edit )
+
 time.sleep(10)
-iframe = driver.find_element_by_tag_name('iframe')
-# iframe = driver.find_element_by_id(iframe_class)
-driver.switch_to.frame(iframe)
-print(iframe)
-print("iframe")
+iframes = driver.find_elements_by_tag_name('iframe')
 
-# after login
-root = '//[@id="ft-id-1"]/li/span'
+# 1. processing file_tree iframe
+tree_iframe = iframes[0]
+driver.switch_to.frame(tree_iframe)
 
-element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, root))).click()
-element.click()
+# root = '//[@id="ft-id-1"]/li/span'
+#
+# element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, root))).click()
+# element.click()
 
 # element = wait.until(EC.element_to_be_clickable((By.XPATH, root)))
-print("wait")
 # element.click()
-print("y")
 
-webdriver.ActionChains(driver).move_to_element(root).click(root).perform()
+# webdriver.ActionChains(driver).move_to_element(root).click(root).perform()
 
 
 # 3 type of function ( image / QA / text )
