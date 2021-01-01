@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import csv
 import os
 from os import listdir
 from os.path import isfile, join
@@ -16,7 +15,7 @@ file_list = [f for f in listdir(AB_DIR) if isfile(join(AB_DIR, f))]
 print(file_list)
 
 wb = openpyxl.load_workbook(DIR + file_list[1])
-sheet = wb['sheet1']
+sheet = wb.active
 
 # column 개수 - 1 만큼 업로드 해야함
 # 채워야 하는 데이터 input : 각 column의 row 개수

@@ -4,20 +4,15 @@
 # requirement :
 # 1. 포맷에 맞춘 엑셀파일( 2개의 row로 쪼개야함 )
 # 2. 단락 넘어갈 때 '-' 로 된 단어 미리 수정해놔야함
-# 3. 확장자 csv
+# 3. 데이터 중복화 적용 해줘야 함
 # date : 2020/12/30
 
-import pandas as pd
-import csv
-# from Data/chart_data import *
+import openpyxl
+from os import listdir
+from os.path import isfile, join
 
-# have to format specific excel style (sentences -> words)
-# read data and make the list
-# with open('word.csv', 'r', encoding='UTF8') as csv_file:
-#     reader = csv.reader(csvfile, delimiter=',')
-#     pc = ([j.replace('\t', "") for i in reader for j in i])
-
-mp = ['property', 'properties', 'conduction', 'driving', 'frequencies', 'absorbance', 'space_charge_limited', 'scattering', 'phase', 'valence', 'electronic', 'doping', 'force', 'vibrational', 'opacity', 'mass', 'holes', 'solid-state', 'thermochemical', 'doped', 'endothermic', 'energy', 'electric', 'excited', 'barrier', 'physical', 'electrochemical', 'intrinsic', 'transmittance', 'field', 'chemical', 'semiconductor', 'HOMO', 'metallic', 'charge', 'electrons', 'bands', 'electron', 'atomic', 'transport', 'LUMO', 'insulator', 'electrically', 'trapping', 'detrapping', 'stretching', 'electromagnetic', 'metal', 'carbon-rich', 'chemically']
+# Data tagging rule
+mp = ['property', 'properties', 'conduction', 'driving', 'frequency', 'frequencies', 'absorbance', 'space_charge_limited', 'scattering', 'phase', 'valence', 'electronic', 'doping', 'force', 'vibrational', 'opacity', 'mass', 'holes', 'solid-state', 'thermochemical', 'doped', 'endothermic', 'energy', 'electric', 'excited', 'barrier', 'physical', 'electrochemical', 'intrinsic', 'transmittance', 'field', 'chemical', 'semiconductor', 'HOMO', 'metallic', 'charge', 'electrons', 'bands', 'electron', 'atomic', 'transport', 'LUMO', 'insulator', 'electrically', 'trapping', 'detrapping', 'stretching', 'electromagnetic', 'metal', 'carbon-rich', 'chemically']
 sp_dev = ['/']
 ds = ['structure', 'TE', 'BE', 'electrode', 'conventional', 'electrolyte', 'dielectric', 'buffer', 'active', 'top', 'bottom', 'layer', 'substrate', 'thickness', 'thick', 'tox', 'multistack', 'vertical', 'channel', 'Cluster', 'cluster', 'MIM', 'cross-point', 'nanowire', 'nanodot', 'nanomesh', 'X-point', 'oxram', 'CBRAM', 'terminal', 'surface', 'PMC', 'ReRAM', 'width', 'pitch', 'film']
 da = ['application', 'selector', 'memristors', 'memristive', 'Memory', 'neuromorphic', 'switch', 'mulit-level', 'MLC', 'memories', 'Neural', 'NVM', 'storage', 'floating_gate', 'nonvolatile', 'transistors']
@@ -29,7 +24,7 @@ pv = ['voltage', 'Vset', 'Vreset', 'Vforming', 'Vread', 'Verase', 'Vprogram']
 pr = ['resistance', 'resistive', 'conductivity', 'high_resistance', 'low-resistance', 'HRS', 'LRS', 'RH', 'RL', 'Roff', 'Ron', 'resistance-state']
 po = ['operating', 'Forming-free', 'semi-forming', 'unipolar', 'bipolar', 'complementary', 'ON', 'OFF', 'operation', 'Program', 'erase', 'read', 'write', 'rupture', 'fast', 'slow', 'forming', 'current–voltage', 'I–V','formation', 'Electroforming', 'switching', 'breakdown', 'high', 'low', 'set', 'reset', 'positive', 'negative', 'threshold', 'sweep', 'dissolution', 'polarity']
 ps = ['speed']
-pe = ['endurance', 'cycles', 'cycling', 'cyclability']
+pe = ['endurance', 'cycle', 'cycles', 'cycling', 'cyclability']
 pt = ['retention', 'lifetime']
 pab = ['reliability', 'stability', 'variability', 'disturbance', 'uniformity', 'dispersion', 'distributions', 'cumulative', 'Fluctuation', 'deviation', 'window', 'non-uniformity', 'uniform', 'reproducible', 'probabilities']
 plec = ['selectivity', 'ratio', 'Non-linearity']
@@ -40,34 +35,47 @@ s = ['synthesis', 'RF-sputtering', 'sputtering', 'e-beam', 'evaporator', 'spin-c
 
 u = ["kg", "nm", "mm", "mA", "Ω", "lm","µm", "µ", "ppm", "L", "C"]
 
-chemi = ['H', 'He', 'Li', 'Be', 'B', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'Ca', 'Sc', 'Ti', 'Cr', 'Fe', 'Co', 'Ni', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'Xe', 'Cs', 'Ba', 'Hf', 'Ta', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn']
+chemi = ['H', 'He', 'Li', 'B', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'Ca', 'Sc', 'Ti', 'Cr', 'Fe', 'Co', 'Ni', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'Xe', 'Cs', 'Ba', 'Hf', 'Ta', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn']
 
+# dictionary 형태로 다시 묶음
 data_set = {'mp': mp, 'sp_dev': sp_dev, 'ds': ds, 'da': da,
             'p' : p, 'pp': pp, 'pc': pc,
             'pv': pv, 'pr': pr, 'po': po, 'ps': ps, 'pe': pe, 'pt': pt,
             'pab': pab, 'plec': plec, 'mc': plec, 'e': e, 's': s, 'u': u, 'chemi': chemi}
 
-# with open('word.csv', 'r', encoding='UTF8') as csv_file:
-#     csv_reader = csv.reader(csv_file)
-#
-#     with open('word_step_1.csv','w') as new_file:
-#         csv_writer = csv.writer(new_file)
-#
-#         for line in csv_reader:
-#             csv_writer.writerow(line)
+def check_number(number):
+    try:
+        float(number)
+        return True
+    except: return False
 
-reader = ["9", "10", "ECM", "Ω", "evaporator"]
+# to do list : list 대문자로 만들기
+def word_check(word,data_set):
+    checking = 'o'
+    for tag, checked_list in data_set.items():
+        if word in checked_list:
+            checking = tag
+            break
+        # 숫자 체크 (음수, 소수 가능)
+        # 자연상수??
+        elif check_number(word): checking = 'n'
+    return checking
 
-def word_check(reader,data_set):
-    checked = ['o'] * len(reader)
-    print(reader)
-    for i in range(len(reader)):
-        for tag, checked_list in data_set.items():
-            if reader[i] in checked_list :
-                checked[i] = tag
-                break
-    print(checked)
+# 절대 경로 / 상대 경로
+AB_DIR = '/Users/SBJ/Desktop/kriss/Data/Text/Word'
+DIR = 'Data/Text/Word/'
 
-# to do list : 숫자 찾기, list 대문자로 만들기
+# Data/Text/Word 에 있는 파일을 리스트로 생성
+file_list = [f for f in listdir(AB_DIR) if isfile(join(AB_DIR, f))]
+# print(file_list)
 
-word_check(reader,data_set)
+wb = openpyxl.load_workbook(DIR + file_list[0])
+sheet = wb.active
+
+# sheet의 row 개수 만큼 검사
+max_row = sheet.max_row + 1
+
+for i in range(1,max_row):
+    sheet.cell(i,2).value = word_check(sheet.cell(i,1).value,data_set)
+
+wb.save(DIR + file_list[0])
