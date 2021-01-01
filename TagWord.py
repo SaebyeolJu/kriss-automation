@@ -2,7 +2,7 @@
 
 # tag_word : after extract word data from paper, taging all of the data
 # requirement :
-# 1. 포맷에 맞춘 엑셀파일( 2개의 row로 쪼개야함 )
+# 1. 포맷에 맞춘 엑셀파일(2개의 row로 쪼개야함 )
 # 2. 단락 넘어갈 때 '-' 로 된 단어 미리 수정해놔야함
 # 3. 데이터 중복화 적용 해줘야 함
 # date : 2020/12/30
@@ -33,9 +33,11 @@ mc = ['mechanism', 'VCM', 'ECM', 'interface-switching', 'filament', 'thermal-che
 e = ['environment', 'humidity', 'temperature', 'pressure', 'time', 'heat', 'air', 'dry']
 s = ['synthesis', 'RF-sputtering', 'sputtering', 'e-beam', 'evaporator', 'spin-coated', 'sputtering', 'annealing', 'laser', 'lithography', 'photolithography', 'etching', 'etched', 'patterning', 'ALD', 'CVD', 'PVD', 'PLD', 'plasma', 'deposition', 'process', 'solution', 'self-assembly', 'drying', 'thermal', 'angled', 'beam', 'vapor', 'printing']
 
-u = ["kg", "nm", "mm", "mA", "Ω", "lm","µm", "µ", "ppm", "L", "C"]
+u = ["kg", "nm", "mm", "mA", "V", "Ω", "lm","µm", "µ", "ppm", "L", "C"]
 
-chemi = ['H', 'He', 'Li', 'B', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'Ca', 'Sc', 'Ti', 'Cr', 'Fe', 'Co', 'Ni', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'Xe', 'Cs', 'Ba', 'Hf', 'Ta', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn']
+chemi = ['H', 'He', 'NiO', 'Li', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'Ca', 'Sc', 'Ti', 'Cr', 'Fe', 'Co', 'Ni', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'Sn', 'Sb', 'Te', 'Xe', 'Cs', 'Ba', 'Hf', 'Ta', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'Rn', 'Fr', 'Ra', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn']
+# caution = ['As', 'In', 'V', 'B', 'C', 'I', 'K']
+# 온도 단위 = chemi -> ['C','K']
 
 # dictionary 형태로 다시 묶음
 data_set = {'mp': mp, 'sp_dev': sp_dev, 'ds': ds, 'da': da,
@@ -49,16 +51,19 @@ def check_number(number):
         return True
     except: return False
 
-# to do list : list 대문자로 만들기
 def word_check(word,data_set):
     checking = 'o'
+    word = str(word).replace('^', '').replace(',', '')
     for tag, checked_list in data_set.items():
-        if word in checked_list:
+        upper_list = [x.upper() for x in checked_list]
+        if check_number(word):
+            checking = 'n'
+            break
+        elif word.upper() in upper_list:
             checking = tag
             break
         # 숫자 체크 (음수, 소수 가능)
-        # 자연상수??
-        elif check_number(word): checking = 'n'
+        # 자연상수는?
     return checking
 
 # 절대 경로 / 상대 경로
@@ -75,7 +80,7 @@ sheet = wb.active
 # sheet의 row 개수 만큼 검사
 max_row = sheet.max_row + 1
 
-for i in range(1,max_row):
-    sheet.cell(i,2).value = word_check(sheet.cell(i,1).value,data_set)
+for i in range(1, max_row):
+    sheet.cell(i, 2).value = word_check(sheet.cell(i, 1).value, data_set)
 
 wb.save(DIR + file_list[0])
