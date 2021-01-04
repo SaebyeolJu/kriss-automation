@@ -4,12 +4,13 @@ import sys
 import openpyxl
 from os import listdir
 from os.path import isfile, join
+from os import rename, listdir
 
 # 두께 비례식
 def thickness():
-    stand = float(input('기준 단위 : '))
+    stand = float(input('기준 단위(nm) : '))
     stand_cm = float(input('기준 단위 측정 cm : '))
-    mat_cm = float(input('구해야 할 소재 cm :'))
+    mat_cm = float(input('구해야 할 소재 cm : '))
     mat = (stand * mat_cm) / stand_cm
     return str(mat)
 
@@ -18,40 +19,41 @@ def curve(paper_name, image_number, DIR):
     wb = openpyxl.load_workbook(DIR + '/image.xlsx')
     s_curve = wb['s_curve']
 
-    info = ['figure_name', 'x-axis', 'y-axis', 'device',
-                    'on_current (A)', 'off_current (A)', 'set voltage (V)',
-                    'off voltage (V)', 'unipolar/bipolar']
-    for i in range(1,len(info)):
-        s_curve.cell(i,1).value = info[i]
+    info = ['file_name', 'figure_name', 'x-axis', 'y-axis', 'device',
+            'set voltage (V)', 'off voltage (V)',
+            'on_current (A)', 'off_current (A)', 'unipolar/bipolar']
+
+    for i in range(0, len(info)):
+        s_curve.cell(i+1, 1).value = info[i]
 
     i_number = image_number
-    image_name = f'{paper_name}.I.V-curve{i_number}_1'
+    image_name = f'{paper_name}.iv_curve{i_number}_1'
 
     curve_info = ['NAN'] * 10
     curve_info[0] = image_name
-    curve_info[1] = 'Figure_' + input('Figure 이름 : ')
+    curve_info[1] = f'{paper_name}.figure.' + input('Figure 이름 : ')
 
     x_first = input('x-axis first : ')
     x_last = input('x-axis last : ')
-    curve_info[2] = f'[{x_first}:{x_last}]'
+    curve_info[2] = f'[{x_first},{x_last}]'
 
     y_first = input('y-axis first : ')
     y_last = input('y-axis last : ')
-    curve_info[3] = f'[{y_first}:{y_last}]'
+    curve_info[3] = f'[{y_first},{y_last}]'
 
     # device
     curve_info[4] = input('device : ')
 
-    # current
-    curve_info[5] = input('on current : ')
-    curve_info[6] = input('off current : ')
-
     # voltage
-    curve_info[7] = input('set voltage : ')
-    curve_info[8] = input('reset voltage : ')
+    curve_info[5] = input('set voltage : ')
+    curve_info[6] = input('reset voltage : ')
+
+    # current
+    curve_info[7] = input('on current : ')
+    curve_info[8] = input('off current : ')
 
     curve_info[9] = input('unipolar / bipolar?(1 / 2) : ')
-    if curve_info[9] == '1' : curve_info[8] = 'unipolar'
+    if curve_info[9] == '1': curve_info[9] = 'unipolar'
     else: curve_info[9] = 'bipolar'
 
     # 얻은 값들 엑셀 쓰기
@@ -59,9 +61,13 @@ def curve(paper_name, image_number, DIR):
     for row in range(0, len(curve_info)):
         s_curve.cell(row+1, max_col+1).value = curve_info[row]
 
+    # file name change
+    old_file = os.path.join(DIR, f'{image_number}.png')
+    new_file = os.path.join(DIR, f'{curve_info[0]}.png')
+    os.rename(old_file, new_file)
+
     wb.save(DIR + '/image.xlsx')
     wb.close()
-
     return print(f'{image_number}번째 이미지 done')
 
 # element 개수마다 element_info 추가됨
@@ -71,23 +77,26 @@ def device(paper_name, image_number, DIR):
     wb = openpyxl.load_workbook(DIR + '/image.xlsx')
     s_device = wb['s_device']
 
+    info = ['file_name', 'figure_name', 'device']
+
     i_number = image_number
     image_name = f'{paper_name}.device{i_number}_1'
     element_cnt = int(input('element 총 몇 개? : '))
 
-    # element 개수만큼 생
+    # element 개수만큼 생김
     # 0 : figure_name / 1 : device / [2: element / 3: thickness]
     device_info = ['NAN'] * 2
-    device_info[0] = 'Figure_' + input('Figure 이름 : ')
+    device_info[0] = f'{paper_name}.figure.' + input('Figure 이름 : ')
     device_info[1] = input('Device 구성 : ')
 
     for i in range(element_cnt):
         element_info = ['NAN'] * 2
-        element_info[0] = input(f'{i} 번째 소재 element : ')
+        element_info[0] = input(f'{i+1} 번째 소재 element : ')
         if input('두께 계산해야함? (y/n) : ') == 'y':
             element_info[1] = thickness()
         else: element_info[1] = input('두께 : ')
-        device_info.extend(element_info)
+        device_info.append(f'[{element_info[0]}, {element_info[1]}]')
+        info.append(f'layer_{i+1}')
     device_info.insert(0, image_name)
 
     # 얻은 값들 엑셀 쓰기
@@ -95,13 +104,17 @@ def device(paper_name, image_number, DIR):
     for row in range(0, len(device_info)):
         s_device.cell(row+1, max_col+1).value = device_info[row]
 
-    # info = ['figure_name', 'device']
-    # for i in range(1,len(info)):
-    #     s_device.cell(i,1).value = info[i]
+    # index 정보 쓰기
+    for i in range(0, len(info)):
+        s_device.cell(i+1, 1).value = info[i]
+
+    # file name change
+    old_file = os.path.join(DIR, f'{image_number}.png')
+    new_file = os.path.join(DIR, f'{device_info[0]}.png')
+    os.rename(old_file, new_file)
 
     wb.save(DIR + '/image.xlsx')
     wb.close()
-
     return print(f'{image_number}번째 이미지 done')
 
 def endurance(paper_name, image_number, DIR):
@@ -118,45 +131,63 @@ def endurance(paper_name, image_number, DIR):
     # 7 : high resistance / 8 : high gradient
     # 9 : low resistance / 10 : low gradient
 
+    info = ['file_name', 'figure_name', 'x-axis', 'y-axis',
+            'Device', 'temperature', 'cycles',
+            'high resistance', 'high gradient', 'low resistance', 'low gradient']
+
+    for i in range(0, len(info)):
+        s_endurance.cell(i+1, 1).value = info[i]
+
+    enudrance_set_info = ['NAN'] * 6
+    enudrance_set_info[0] = f'{paper_name}.figure.' + input('Figure 이름 : ')
+
+    x_first = input('x-axis first : ')
+    x_last = input('x-axis last : ')
+    enudrance_set_info[1] = f'[{x_first},{x_last}]'
+
+    y_first = input('y-axis first : ')
+    y_last = input('y-axis last : ')
+    enudrance_set_info[2] = f'[{y_first},{y_last}]'
+
+    enudrance_set_info[3] = input('device : ')
+    enudrance_set_info[4] = float(eval(input('Cycle : ').replace('^', '**')))
+
+    enudrance_set_info[5] = float(input('Temperature(K) : '))
+    temp_check = input('절대 온도인가요? (y / n) : ')
+    if temp_check == 'n': enudrance_set_info[6] += 273
+
     # 선 개수만큼 반복
     for i in range(line_cnt):
-        print(f'{i}번째 선')
+        print(f'{i+1}번째 선')
 
-        endurance_info = ['NAN'] * 11
-        endurance_info[0] = f'{paper_name}.retention{i_number}_{i}'
-        endurance_info[1] = 'Figure_' + input('Figure 이름 : ')
-
-        x_first = input('x-axis first : ')
-        x_last = input('x-axis last : ')
-        endurance_info[2] = f'[{x_first}:{x_last}]'
-
-        y_first = input('y-axis first : ')
-        y_last = input('y-axis last : ')
-        endurance_info[3] = f'[{y_first}:{y_last}]'
-
-        endurance_info[4] = input('Device : ')
-        endurance_info[5] = float(eval(input('Cycle : ').replace('^','**')))
-
-        endurance_info[6] = float(input(('Temperature(K) : ')))
-        temp_check = input('절대 온도인가요? (y / n / r) : ')
-        if temp_check == 'n': endurance_info[6] += 273
-        elif temp_check == 'r': endurance_info[6] = 300
+        endurance_info = ['NAN'] * 4
 
         # high resistance
-        high_res_high = eval(input('위 그래프에 제일 높은 y값 : ').replace('^','**'))
-        high_res_low = eval(input('위 그래프에서 제일 낮은 y값 : ').replace('^','**'))
-        endurance_info[7] = (high_res_high + high_res_low) / 2
+        high_res_high = eval(input('위 그래프에 제일 오른쪽 끝 y값 : ').replace('^', '**'))
+        high_res_low = eval(input('위 그래프에서 제일 왼쪽 끝 쪽 y값 : ').replace('^', '**'))
+        endurance_info[0] = (high_res_high + high_res_low) / 2
 
         # high restance gradient
-        endurance_info[8] = (high_res_high - high_res_low) / endurance_info[6]
+        endurance_info[1] = (high_res_high - high_res_low) / float(enudrance_set_info[4])
 
         # low resistance
-        low_res_high = eval(input('아래 그래프에서 제일 높은 y값 : ').replace('^','**'))
-        low_res_low = eval(input('아래 그래프에서 제일 낮은 y값 : ').replace('^','**'))
-        endurance_info[9] = (low_res_high + low_res_low) / 2
+        low_res_high = eval(input('아래 그래프에서 제일 오른쪽 끝 y값 : ').replace('^', '**'))
+        low_res_low = eval(input('아래 그래프에서 제일 왼쪽 끝  y값 : ').replace('^', '**'))
+        endurance_info[2] = (low_res_high + low_res_low) / 2
 
         # low resistance gradient
-        endurance_info[10] = (low_res_high - low_res_low) / endurance_info[6]
+        endurance_info[3] = (low_res_high - low_res_low) / float(enudrance_set_info[4])
+
+        # file_name
+        enudrance_set_info.insert(0, f'{paper_name}.retention{i_number}_{i+1}')
+
+        # 고정 데이터와 합치기
+        endurance_info = enudrance_set_info + endurance_info
+
+        # file name change
+        old_file = os.path.join(DIR, f'{image_number}.png')
+        new_file = os.path.join(DIR, f'{paper_name}.endurance{i_number}_{i+1}.png')
+        os.rename(old_file, new_file)
 
         # 얻은 값들 엑셀 쓰기
         max_col = s_endurance.max_column
@@ -166,7 +197,6 @@ def endurance(paper_name, image_number, DIR):
 
         wb.save(DIR + '/image.xlsx')
     wb.close()
-
     return print(f'{image_number}번째 이미지 done')
 
 def retention(paper_name, image_number, DIR):
@@ -178,50 +208,64 @@ def retention(paper_name, image_number, DIR):
     i_number = image_number
     line_cnt = int(input('선 총 몇개? : '))
 
-    # 0 : file name / 1 : figure_name / [2: x-axis / 3: y-axis]
-    # 4 : Device / 5: time / 6 : temperature
-    # 7 : high resistance / 8 : high gradient
-    # 9 : low resistance / 10 : low gradient
+    info = ['file_name', 'figure_name', 'x-axis', 'y-axis',
+            'Device', 'time', 'temperature',
+            'high resistance', 'high gradient', 'low resistance', 'low gradient']
 
-    # 선 개수만큼 반복
+    for i in range(0,len(info)):
+        s_retention.cell(i+1, 1).value = info[i]
+
+    retention_set_info = ['NAN'] * 6
+    retention_set_info[0] = f'{paper_name}.figure.' + input('Figure 이름 : ')
+
+    x_first = input('x-axis first : ')
+    x_last = input('x-axis last : ')
+    retention_set_info[1] = f'[{x_first},{x_last}]'
+
+    y_first = input('y-axis first : ')
+    y_last = input('y-axis last : ')
+    retention_set_info[2] = f'[{y_first},{y_last}]'
+
+    retention_set_info[3] = input('device : ')
+    retention_set_info[4] = float(eval(input('time : ').replace('^', '**')))
+
+    retention_set_info[5] = float(input('Temperature(K) : '))
+    temp_check = input('절대 온도인가요? (y / n) : ')
+    if temp_check == 'n': retention_set_info[6] += 273
+
+
+# 선 개수만큼 반복
     for i in range(line_cnt):
-        print(f'{i}번째 선')
+        print(f'{i+1}번째 선')
 
-        retention_info = ['NAN'] * 11
-        retention_info[0] = f'{paper_name}.retention{i_number}_{i}'
-        retention_info[1] = 'Figure_' + input('Figure 이름 : ')
-
-        x_first = input('x-axis first : ')
-        x_last = input('x-axis last : ')
-        retention_info[2] = f'[{x_first}:{x_last}]'
-
-        y_first = input('y-axis first : ')
-        y_last = input('y-axis last : ')
-        retention_info[3] = f'[{y_first}:{y_last}]'
-
-        retention_info[4] = input('device : ')
-        retention_info[5] = float(eval(input('time : ').replace('^','**')))
-
-        retention_info[6] = float(input('Temperature(K) : '))
-        temp_check = input('절대 온도인가요? (y / n / r) : ')
-        if temp_check == 'n': retention_info[6] += 273
-        elif temp_check == 'r': retention_info[6] = 300
+        retention_info = ['NAN'] * 4
 
         # high resistance
-        high_res_high = eval(input('위 그래프에 제일 높은 y값 : ').replace('^','**'))
-        high_res_low = eval(input('위 그래프에서 제일 낮은 y값 : ').replace('^','**'))
-        retention_info[7] = (high_res_high + high_res_low) / 2
+        high_res_high = eval(input('위 그래프에 제일 높은 y값 : ').replace('^', '**'))
+        high_res_low = eval(input('위 그래프에서 제일 낮은 y값 : ').replace('^', '**'))
+        retention_info[0] = (high_res_high + high_res_low) / 2
 
         # high restance gradient
-        retention_info[8] = (high_res_high - high_res_low) / retention_info[6]
+        retention_info[1] = (high_res_high - high_res_low) / float(retention_set_info[4])
 
         # low resistance
-        low_res_high = eval(input('아래 그래프에서 제일 높은 y값 : ').replace('^','**'))
-        low_res_low = eval(input('아래 그래프에서 제일 낮은 y값 : ').replace('^','**'))
-        retention_info[9] = (low_res_high + low_res_low) / 2
+        low_res_high = eval(input('아래 그래프에서 제일 높은 y값 : ').replace('^', '**'))
+        low_res_low = eval(input('아래 그래프에서 제일 낮은 y값 : ').replace('^', '**'))
+        retention_info[2] = (low_res_high + low_res_low) / 2
 
         # low resistance gradient
-        retention_info[10] = (low_res_high - low_res_low) / retention_info[6]
+        retention_info[3] = (low_res_high - low_res_low) / float(retention_set_info[4])
+
+        # file_name
+        retention_set_info.insert(0, f'{paper_name}.retention{i_number}_{i+1}')
+
+        # file name change
+        old_file = os.path.join(DIR, f'{image_number}.png')
+        new_file = os.path.join(DIR, f'{paper_name}.retention{i_number}_{i+1}.png')
+        os.rename(old_file, new_file)
+
+        # 고정 데이터와 합치기
+        retention_info = retention_set_info + retention_info
 
         # 얻은 값들 엑셀 쓰기
         max_col = s_retention.max_column
@@ -231,7 +275,6 @@ def retention(paper_name, image_number, DIR):
 
         wb.save(DIR + '/image.xlsx')
     wb.close()
-
     return print(f'{image_number}번째 이미지 done')
 
 def process(name, DIR):
@@ -250,12 +293,16 @@ def process(name, DIR):
     paper_name = name
     image_number = 0
 
-    # 임시로 DIR[0]으로 했는데 폴더 개수만큼 반복하도록 바꿔야함
-    image_list = (os.listdir(DIR[0]))
-    # func_list = {'0': 'curve', '1': 'device', '2': 'endurance', '3': 'retention'}
+    image_list = (os.listdir(DIR))
+    try :
+        if '.DS_Store' in image_list : image_list.remove('.DS_Store')
+        if 'image.xlsx' in image_list : image_list.remove('image.xlsx')
+    except : print('프로그램 시작')
+
+    print(image_list)
 
     for image in range(len(image_list) + 1):
-        print('0 : I-V curve / 1 : device / 2 : endurance / 3 : retention')
+        print('0 : I-V curve / 1 : device / 2 : endurance(cycle) / 3 : retention(time)')
         image_type = input("Image 타입 입력해주세요 : ")
         image_number += 1
 
@@ -264,12 +311,6 @@ def process(name, DIR):
         elif image_type == '2': endurance(paper_name, str(image_number), DIR)
         elif image_type == '3': retention(paper_name, str(image_number), DIR)
 
-    # for i in range(len(func_list)):
-        #     if image_type == str(i):
-        #         image_number += 1
-        #         eval(func_list[str(i)] + '(' + paper_name + ',' + str(image_number) + ',' + DIR + ')')
-    # 임시로 DIR[0]으로 했는데 폴더 개수만큼 반복하도록 바꿔야함
-
 AB_DIR = '/Users/SBJ/Desktop/kriss/thesis'
 
 # 총 3개의 논문, [0,1] 번째는 이미지, QA / 마지막 논문은 text라 해당 안됨
@@ -277,8 +318,9 @@ file_list = (os.listdir(AB_DIR))
 if file_list[0] or file_list[-1] == '.DS_Store': file_list.remove('.DS_Store')
 file_list.sort(key=float)
 
-DIR = [AB_DIR + '/' + file_list[0], AB_DIR + '/' + file_list[1]]
+print(file_list)
+DIR = f'{AB_DIR}/{file_list[0]}'
 
 for i in range(2):
-    print(file_list[i], DIR[i])
-    process(file_list[i], DIR[i])
+    print(file_list[i], DIR)
+    process(file_list[i], DIR)
