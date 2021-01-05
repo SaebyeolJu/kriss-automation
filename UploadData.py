@@ -56,19 +56,24 @@ time.sleep(10)
 image_element_2 = driver.find_element_by_xpath('//*[@id="ui-id-2"]/ul/li[1]/span/span[2]')
 webdriver.ActionChains(driver).move_to_element(image_element_2).click(image_element_2).perform()
 
-# Entry Button
+# Entry Button 누르기
 # go to default iframe -> entry iframe -> click entry botton
 driver.switch_to.default_content()
-entry_frame = iframes[1]
-driver.switch_to.frame(entry_frame)
+
+info_frame = driver.find_element_by_id('_OSPVisualizing_analyzer_DataInfo_INSTANCE_LAYOUT_canvas')
+driver.switch_to.frame(info_frame)
+print('enter info_frame')
 
 # hit the button
 # button tag 2개고, id값 새로고침 할 때마다 바뀜 (Xpath, id값 절대 쓰면 X)
 time.sleep(10)
-entry_buttons = driver.find_elements_by_tag_name('Button')
-ActionChains(driver).move_to_element(entry_buttons[1]).click(entry_buttons[1]).perform()
+entry_button = driver.find_element_by_class_name('button-holder dialog-footer w-100')
+print(entry_button)
+ActionChains(driver).move_to_element(entry_button).click(entry_button).perform()
+print('click entry button')
 
 # file 선택
+time.sleep(10)
 driver.find_element_by_id("_OSPVisualizing_analyzer_DataInfo_dataFile").send_keys(os.getcwd()+"/Data/word.csv")
 
 # method for refreshing to the tree iframe

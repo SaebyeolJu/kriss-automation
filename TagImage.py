@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 import openpyxl
+import natsort
+import sys
 from os import listdir
 from os.path import isfile, join
 from os import rename, listdir
@@ -14,7 +15,7 @@ def thickness():
     mat = (stand * mat_cm) / stand_cm
     return str(mat)
 
-def curve(paper_name, image_number, DIR):
+def curve(paper_name, image_number, DIR, img_file_name, figure_number):
     print('IV curve 그래프')
     wb = openpyxl.load_workbook(DIR + '/image.xlsx')
     s_curve = wb['s_curve']
@@ -26,12 +27,16 @@ def curve(paper_name, image_number, DIR):
     for i in range(0, len(info)):
         s_curve.cell(i+1, 1).value = info[i]
 
-    i_number = image_number
-    image_name = f'{paper_name}.iv_curve{i_number}_1'
-
     curve_info = ['NAN'] * 10
+    curve_info[1] = f'figure.' + input('Figure 이름 : ')
+
+    fig_check = input('이전 figure와 다른 그래프 / 같은 figure인가요?(y/n) : ')
+    if fig_check == 'y' : figure_number += 1
+    else : figure_number = 1
+
+    i_number = image_number
+    image_name = f'{paper_name}.iv_curve{i_number}_{figure_number}'
     curve_info[0] = image_name
-    curve_info[1] = f'{paper_name}.figure.' + input('Figure 이름 : ')
 
     x_first = input('x-axis first : ')
     x_last = input('x-axis last : ')
@@ -62,7 +67,7 @@ def curve(paper_name, image_number, DIR):
         s_curve.cell(row+1, max_col+1).value = curve_info[row]
 
     # file name change
-    old_file = os.path.join(DIR, f'{image_number}.png')
+    old_file = os.path.join(DIR, f'{img_file_name}')
     new_file = os.path.join(DIR, f'{curve_info[0]}.png')
     os.rename(old_file, new_file)
 
@@ -71,7 +76,7 @@ def curve(paper_name, image_number, DIR):
     return print(f'{image_number}번째 이미지 done')
 
 # element 개수마다 element_info 추가됨
-def device(paper_name, image_number, DIR):
+def device(paper_name, image_number, DIR, img_file_name, figure_number):
     print('device 그래프')
 
     wb = openpyxl.load_workbook(DIR + '/image.xlsx')
@@ -79,14 +84,20 @@ def device(paper_name, image_number, DIR):
 
     info = ['file_name', 'figure_name', 'device']
 
-    i_number = image_number
-    image_name = f'{paper_name}.device{i_number}_1'
     element_cnt = int(input('element 총 몇 개? : '))
 
     # element 개수만큼 생김
     # 0 : figure_name / 1 : device / [2: element / 3: thickness]
     device_info = ['NAN'] * 2
-    device_info[0] = f'{paper_name}.figure.' + input('Figure 이름 : ')
+    device_info[0] = 'figure.' + input('Figure 이름 : ')
+
+    fig_check = input('이전 figure와 다른 그래프 / 같은 figure인가요?(y/n) : ')
+    if fig_check == 'y' : figure_number += 1
+    else : figure_number = 1
+
+    i_number = image_number
+    image_name = f'{paper_name}.device{i_number}_{figure_number}'
+
     device_info[1] = input('Device 구성 : ')
 
     for i in range(element_cnt):
@@ -109,7 +120,7 @@ def device(paper_name, image_number, DIR):
         s_device.cell(i+1, 1).value = info[i]
 
     # file name change
-    old_file = os.path.join(DIR, f'{image_number}.png')
+    old_file = os.path.join(DIR, f'{img_file_name}')
     new_file = os.path.join(DIR, f'{device_info[0]}.png')
     os.rename(old_file, new_file)
 
@@ -117,7 +128,7 @@ def device(paper_name, image_number, DIR):
     wb.close()
     return print(f'{image_number}번째 이미지 done')
 
-def endurance(paper_name, image_number, DIR):
+def endurance(paper_name, image_number, DIR, img_file_name, figure_number):
     print('Endurance 그래프')
 
     wb = openpyxl.load_workbook(DIR + '/image.xlsx')
@@ -139,7 +150,7 @@ def endurance(paper_name, image_number, DIR):
         s_endurance.cell(i+1, 1).value = info[i]
 
     enudrance_set_info = ['NAN'] * 6
-    enudrance_set_info[0] = f'{paper_name}.figure.' + input('Figure 이름 : ')
+    enudrance_set_info[0] = 'figure.' + input('Figure 이름 : ')
 
     x_first = input('x-axis first : ')
     x_last = input('x-axis last : ')
@@ -165,18 +176,22 @@ def endurance(paper_name, image_number, DIR):
         # high resistance
         high_res_high = eval(input('위 그래프에 제일 오른쪽 끝 y값 : ').replace('^', '**'))
         high_res_low = eval(input('위 그래프에서 제일 왼쪽 끝 쪽 y값 : ').replace('^', '**'))
-        endurance_info[0] = (high_res_high + high_res_low) / 2
+        endurance_info[0] = round((high_res_high + high_res_low) / 2, 2)
+        endurance_info[0] = str(endurance_info[0]).replace('E', '*10^')
 
         # high restance gradient
-        endurance_info[1] = (high_res_high - high_res_low) / float(enudrance_set_info[4])
+        endurance_info[1] = round((high_res_high - high_res_low) / float(enudrance_set_info[4]), 2)
+        endurance_info[1] = str(endurance_info[1]).replace('E', '*10^')
 
         # low resistance
         low_res_high = eval(input('아래 그래프에서 제일 오른쪽 끝 y값 : ').replace('^', '**'))
         low_res_low = eval(input('아래 그래프에서 제일 왼쪽 끝  y값 : ').replace('^', '**'))
-        endurance_info[2] = (low_res_high + low_res_low) / 2
+        endurance_info[2] = round((low_res_high + low_res_low) / 2, 2)
+        endurance_info[2] = str(endurance_info[2]).replace('E', '*10^')
 
         # low resistance gradient
-        endurance_info[3] = (low_res_high - low_res_low) / float(enudrance_set_info[4])
+        endurance_info[3] = round((low_res_high - low_res_low) / float(enudrance_set_info[4]), 2)
+        endurance_info[3] = str(endurance_info[3]).replace('E', '*10^')
 
         # file_name
         enudrance_set_info.insert(0, f'{paper_name}.retention{i_number}_{i+1}')
@@ -185,7 +200,7 @@ def endurance(paper_name, image_number, DIR):
         endurance_info = enudrance_set_info + endurance_info
 
         # file name change
-        old_file = os.path.join(DIR, f'{image_number}.png')
+        old_file = os.path.join(DIR, f'{img_file_name}')
         new_file = os.path.join(DIR, f'{paper_name}.endurance{i_number}_{i+1}.png')
         os.rename(old_file, new_file)
 
@@ -199,7 +214,7 @@ def endurance(paper_name, image_number, DIR):
     wb.close()
     return print(f'{image_number}번째 이미지 done')
 
-def retention(paper_name, image_number, DIR):
+def retention(paper_name, image_number, DIR, img_file_name, figure_number):
     print('Retention 그래프')
 
     wb = openpyxl.load_workbook(DIR + '/image.xlsx')
@@ -216,7 +231,7 @@ def retention(paper_name, image_number, DIR):
         s_retention.cell(i+1, 1).value = info[i]
 
     retention_set_info = ['NAN'] * 6
-    retention_set_info[0] = f'{paper_name}.figure.' + input('Figure 이름 : ')
+    retention_set_info[0] = 'figure.' + input('Figure 이름 : ')
 
     x_first = input('x-axis first : ')
     x_last = input('x-axis last : ')
@@ -243,24 +258,27 @@ def retention(paper_name, image_number, DIR):
         # high resistance
         high_res_high = eval(input('위 그래프에 제일 높은 y값 : ').replace('^', '**'))
         high_res_low = eval(input('위 그래프에서 제일 낮은 y값 : ').replace('^', '**'))
-        retention_info[0] = (high_res_high + high_res_low) / 2
+        retention_info[0] = round((high_res_high + high_res_low) / 2, 2)
 
         # high restance gradient
-        retention_info[1] = (high_res_high - high_res_low) / float(retention_set_info[4])
+        retention_info[1] = round((high_res_high - high_res_low) / float(retention_set_info[4]), 2)
+        retention_info[1] = str(retention_info[1]).replace('E', '*10^')
 
         # low resistance
         low_res_high = eval(input('아래 그래프에서 제일 높은 y값 : ').replace('^', '**'))
         low_res_low = eval(input('아래 그래프에서 제일 낮은 y값 : ').replace('^', '**'))
-        retention_info[2] = (low_res_high + low_res_low) / 2
+        retention_info[2] = round((low_res_high + low_res_low) / 2, 2)
+        retention_info[2] = str(retention_info[2]).replace('E', '*10^')
 
         # low resistance gradient
-        retention_info[3] = (low_res_high - low_res_low) / float(retention_set_info[4])
+        retention_info[3] = round((low_res_high - low_res_low) / float(retention_set_info[4]), 2)
+        retention_info[3] = str(retention_info[3]).replace('E', '*10^')
 
         # file_name
         retention_set_info.insert(0, f'{paper_name}.retention{i_number}_{i+1}')
 
         # file name change
-        old_file = os.path.join(DIR, f'{image_number}.png')
+        old_file = os.path.join(DIR, f'{img_file_name}')
         new_file = os.path.join(DIR, f'{paper_name}.retention{i_number}_{i+1}.png')
         os.rename(old_file, new_file)
 
@@ -291,25 +309,35 @@ def process(name, DIR):
     wb.save(DIR + '/image.xlsx')
 
     paper_name = name
-    image_number = 0
+    image_cnt = [0] * 4
+    figure_number = 0
 
     image_list = (os.listdir(DIR))
+
     try :
         if '.DS_Store' in image_list : image_list.remove('.DS_Store')
         if 'image.xlsx' in image_list : image_list.remove('image.xlsx')
     except : print('프로그램 시작')
 
+    image_list = natsort.natsorted(image_list)
     print(image_list)
 
     for image in range(len(image_list) + 1):
         print('0 : I-V curve / 1 : device / 2 : endurance(cycle) / 3 : retention(time)')
         image_type = input("Image 타입 입력해주세요 : ")
-        image_number += 1
 
-        if image_type == '0': curve(paper_name, str(image_number), DIR)
-        elif image_type == '1': device(paper_name, str(image_number), DIR)
-        elif image_type == '2': endurance(paper_name, str(image_number), DIR)
-        elif image_type == '3': retention(paper_name, str(image_number), DIR)
+        if image_type == '0':
+            image_cnt[0] += 1
+            curve(paper_name, str(image_cnt[0]), DIR, image_list[image], figure_number)
+        elif image_type == '1':
+            image_cnt[1] += 1
+            device(paper_name, str(image_cnt[1]), DIR, image_list[image], figure_number)
+        elif image_type == '2':
+            image_cnt[2] += 1
+            endurance(paper_name, str(image_cnt[2]), DIR, image_list[image], figure_number)
+        elif image_type == '3':
+            image_cnt[3] += 1
+            retention(paper_name, str(image_cnt[3]), DIR, image_list[image], figure_number)
 
 AB_DIR = '/Users/SBJ/Desktop/kriss/thesis'
 
