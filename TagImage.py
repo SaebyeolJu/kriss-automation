@@ -35,7 +35,7 @@ def curve(paper_name, image_number, DIR, img_file_name, figure_number):
     else : figure_number = 1
 
     i_number = image_number
-    image_name = f'{paper_name}.iv_curve{i_number}_{figure_number}'
+    image_name = f'{paper_name}.IV-curve{i_number}_{figure_number}'
     curve_info[0] = image_name
 
     x_first = input('x-axis first : ')
@@ -84,12 +84,12 @@ def device(paper_name, image_number, DIR, img_file_name, figure_number):
 
     info = ['file_name', 'figure_name', 'device']
 
-    element_cnt = int(input('element 총 몇 개? : '))
-
     # element 개수만큼 생김
     # 0 : figure_name / 1 : device / [2: element / 3: thickness]
     device_info = ['NAN'] * 2
     device_info[0] = 'figure.' + input('Figure 이름 : ')
+
+    element_cnt = int(input('element 총 몇 개? : '))
 
     fig_check = input('이전 figure와 다른 그래프 / 같은 figure인가요?(y/n) : ')
     if fig_check == 'y' : figure_number += 1
@@ -161,11 +161,13 @@ def endurance(paper_name, image_number, DIR, img_file_name, figure_number):
     enudrance_set_info[2] = f'[{y_first},{y_last}]'
 
     enudrance_set_info[3] = input('device : ')
-    enudrance_set_info[4] = float(eval(input('Cycle : ').replace('^', '**')))
 
-    enudrance_set_info[5] = float(input('Temperature(K) : '))
+    enudrance_set_info[4] = float(input('Temperature(K) : '))
     temp_check = input('절대 온도인가요? (y / n) : ')
-    if temp_check == 'n': enudrance_set_info[6] += 273
+    if temp_check == 'n': enudrance_set_info[4] += 273
+
+    enudrance_set_info[5] = input('Cycle : ').replace('^', '**')
+    time = float(eval(enudrance_set_info[5]))
 
     # 선 개수만큼 반복
     for i in range(line_cnt):
@@ -177,21 +179,21 @@ def endurance(paper_name, image_number, DIR, img_file_name, figure_number):
         high_res_high = eval(input('위 그래프에 제일 오른쪽 끝 y값 : ').replace('^', '**'))
         high_res_low = eval(input('위 그래프에서 제일 왼쪽 끝 쪽 y값 : ').replace('^', '**'))
         endurance_info[0] = round((high_res_high + high_res_low) / 2, 2)
-        endurance_info[0] = str(endurance_info[0]).replace('E', '*10^')
+        # endurance_info[0] = str(endurance_info[0]).replace('E', '*10^')
 
         # high restance gradient
-        endurance_info[1] = round((high_res_high - high_res_low) / float(enudrance_set_info[4]), 2)
-        endurance_info[1] = str(endurance_info[1]).replace('E', '*10^')
+        endurance_info[1] = round((high_res_high - high_res_low) / float(time, 2))
+        # endurance_info[1] = str(endurance_info[1]).replace('E', '*10^')
 
         # low resistance
         low_res_high = eval(input('아래 그래프에서 제일 오른쪽 끝 y값 : ').replace('^', '**'))
         low_res_low = eval(input('아래 그래프에서 제일 왼쪽 끝  y값 : ').replace('^', '**'))
         endurance_info[2] = round((low_res_high + low_res_low) / 2, 2)
-        endurance_info[2] = str(endurance_info[2]).replace('E', '*10^')
+        # endurance_info[2] = str(endurance_info[2]).replace('E', '*10^')
 
         # low resistance gradient
-        endurance_info[3] = round((low_res_high - low_res_low) / float(enudrance_set_info[4]), 2)
-        endurance_info[3] = str(endurance_info[3]).replace('E', '*10^')
+        endurance_info[3] = round((low_res_high - low_res_low) / float(time, 2))
+        # endurance_info[3] = str(endurance_info[3]).replace('E', '*10^')
 
         # file_name
         enudrance_set_info.insert(0, f'{paper_name}.retention{i_number}_{i+1}')
@@ -242,11 +244,12 @@ def retention(paper_name, image_number, DIR, img_file_name, figure_number):
     retention_set_info[2] = f'[{y_first},{y_last}]'
 
     retention_set_info[3] = input('device : ')
-    retention_set_info[4] = float(eval(input('time : ').replace('^', '**')))
+    retention_set_info[4] = input('time : ').replace('^', '**')
+    cycle = float(eval(retention_set_info[4]))
 
     retention_set_info[5] = float(input('Temperature(K) : '))
     temp_check = input('절대 온도인가요? (y / n) : ')
-    if temp_check == 'n': retention_set_info[6] += 273
+    if temp_check == 'n': retention_set_info[5] += 273
 
 
 # 선 개수만큼 반복
@@ -261,18 +264,18 @@ def retention(paper_name, image_number, DIR, img_file_name, figure_number):
         retention_info[0] = round((high_res_high + high_res_low) / 2, 2)
 
         # high restance gradient
-        retention_info[1] = round((high_res_high - high_res_low) / float(retention_set_info[4]), 2)
-        retention_info[1] = str(retention_info[1]).replace('E', '*10^')
+        retention_info[1] = round((high_res_high - high_res_low) / float(cycle, 2))
+        # retention_info[1] = str(retention_info[1]).replace('E', '*10^')
 
         # low resistance
         low_res_high = eval(input('아래 그래프에서 제일 높은 y값 : ').replace('^', '**'))
         low_res_low = eval(input('아래 그래프에서 제일 낮은 y값 : ').replace('^', '**'))
         retention_info[2] = round((low_res_high + low_res_low) / 2, 2)
-        retention_info[2] = str(retention_info[2]).replace('E', '*10^')
+        # retention_info[2] = str(retention_info[2]).replace('E', '*10^')
 
         # low resistance gradient
-        retention_info[3] = round((low_res_high - low_res_low) / float(retention_set_info[4]), 2)
-        retention_info[3] = str(retention_info[3]).replace('E', '*10^')
+        retention_info[3] = round((low_res_high - low_res_low) / float(cycle, 2))
+        # retention_info[3] = str(retention_info[3]).replace('E', '*10^')
 
         # file_name
         retention_set_info.insert(0, f'{paper_name}.retention{i_number}_{i+1}')
@@ -343,7 +346,10 @@ AB_DIR = '/Users/SBJ/Desktop/kriss/thesis'
 
 # 총 3개의 논문, [0,1] 번째는 이미지, QA / 마지막 논문은 text라 해당 안됨
 file_list = (os.listdir(AB_DIR))
-if file_list[0] or file_list[-1] == '.DS_Store': file_list.remove('.DS_Store')
+if file_list[0] or file_list[-1] == '.DS_Store' or 'TextImg':
+    file_list.remove('.DS_Store')
+    file_list.remove('TextImg')
+
 file_list.sort(key=float)
 
 print(file_list)

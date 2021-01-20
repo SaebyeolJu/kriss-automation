@@ -36,7 +36,7 @@ DIR = 'Data/Text/Word/'
 file_list = [f for f in listdir(AB_DIR) if isfile(join(AB_DIR, f))]
 print(file_list)
 
-wb = openpyxl.load_workbook(DIR + file_list[0])
+wb = openpyxl.load_workbook(DIR + file_list[1])
 sheet = wb.active
 
 max_row = sheet.max_row
@@ -61,4 +61,4 @@ for row in range(3, max_row + 1, 2):
     sheet.cell(row, 2).value = str(category)
     sheet.cell(row, 3).value = str(numerical)
 
-wb.save(DIR + file_list[0])
+wb.save(DIR + file_list[1])
