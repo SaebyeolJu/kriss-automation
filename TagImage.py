@@ -164,7 +164,9 @@ def endurance(paper_name, image_number, DIR, img_file_name, figure_number):
 
     enudrance_set_info[4] = float(input('Temperature(K) : '))
     temp_check = input('절대 온도인가요? (y / n) : ')
-    if temp_check == 'n': enudrance_set_info[4] += 273
+    if temp_check == 'n':
+        enudrance_set_info[4] += 273
+    elif temp_check == 'y': enudrance_set_info[4] = "3.0*10^2"
 
     enudrance_set_info[5] = input('Cycle : ').replace('^', '**')
     time = float(eval(enudrance_set_info[5]))
@@ -182,7 +184,7 @@ def endurance(paper_name, image_number, DIR, img_file_name, figure_number):
         # endurance_info[0] = str(endurance_info[0]).replace('E', '*10^')
 
         # high restance gradient
-        endurance_info[1] = round((high_res_high - high_res_low) / float(time, 2))
+        endurance_info[1] = round((high_res_high - high_res_low) / float(time),2)
         # endurance_info[1] = str(endurance_info[1]).replace('E', '*10^')
 
         # low resistance
@@ -192,7 +194,7 @@ def endurance(paper_name, image_number, DIR, img_file_name, figure_number):
         # endurance_info[2] = str(endurance_info[2]).replace('E', '*10^')
 
         # low resistance gradient
-        endurance_info[3] = round((low_res_high - low_res_low) / float(time, 2))
+        endurance_info[3] = round((low_res_high - low_res_low) / float(time), 2)
         # endurance_info[3] = str(endurance_info[3]).replace('E', '*10^')
 
         # file_name
@@ -250,6 +252,7 @@ def retention(paper_name, image_number, DIR, img_file_name, figure_number):
     retention_set_info[5] = float(input('Temperature(K) : '))
     temp_check = input('절대 온도인가요? (y / n) : ')
     if temp_check == 'n': retention_set_info[5] += 273
+    elif temp_check == 'y': retention_set_info[5] = "3.0*10^2"
 
 
 # 선 개수만큼 반복
@@ -264,7 +267,7 @@ def retention(paper_name, image_number, DIR, img_file_name, figure_number):
         retention_info[0] = round((high_res_high + high_res_low) / 2, 2)
 
         # high restance gradient
-        retention_info[1] = round((high_res_high - high_res_low) / float(cycle, 2))
+        retention_info[1] = round((high_res_high - high_res_low) / float(cycle), 2)
         # retention_info[1] = str(retention_info[1]).replace('E', '*10^')
 
         # low resistance
@@ -274,7 +277,7 @@ def retention(paper_name, image_number, DIR, img_file_name, figure_number):
         # retention_info[2] = str(retention_info[2]).replace('E', '*10^')
 
         # low resistance gradient
-        retention_info[3] = round((low_res_high - low_res_low) / float(cycle, 2))
+        retention_info[3] = round((low_res_high - low_res_low) / float(cycle), 2)
         # retention_info[3] = str(retention_info[3]).replace('E', '*10^')
 
         # file_name
