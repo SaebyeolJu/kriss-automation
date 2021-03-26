@@ -74,13 +74,9 @@ def QA(DIR, QA_file):
     QA_tree_2 = driver.find_element_by_xpath('//*[@id="ui-id-2"]/ul/li/span')
     webdriver.ActionChains(driver).move_to_element(QA_tree_2).click(QA_tree_2).perform()
 
-    time.sleep(1)
-    QA_tree_3 = driver.find_element_by_xpath('//*[@id="ui-id-3"]/ul/li[2]')
-    webdriver.ActionChains(driver).move_to_element(QA_tree_2).click(QA_tree_3).perform()
     # QA 경로 가기 끝남
 
     driver.switch_to.default_content()
-
     info_frame = driver.find_element_by_id('_OSPVisualizing_analyzer_DataInfo_INSTANCE_LAYOUT_canvas')
     driver.switch_to.frame(info_frame)
 
@@ -135,10 +131,6 @@ def para(DIR, para_file):
     time.sleep(1)
     para_tree = driver.find_element_by_xpath('//*[@id="ui-id-2"]/ul/li[1]/span/span[2]')
     webdriver.ActionChains(driver).move_to_element(para_tree).click(para_tree).perform()
-
-    time.sleep(1)
-    para_tree_2 = driver.find_element_by_xpath('//*[@id="ui-id-3"]/ul/li[5]/span')
-    webdriver.ActionChains(driver).move_to_element(para_tree).click(para_tree_2).perform()
 
     driver.switch_to.default_content()
 
@@ -197,12 +189,7 @@ def text(DIR, text_file):
     text_label_tree = driver.find_element_by_xpath('//*[@id="ui-id-2"]/ul/li[2]/span/span[2]')
     webdriver.ActionChains(driver).move_to_element(text_label_tree).click(text_label_tree).perform()
 
-    text_label_tree_2 = driver.find_element_by_xpath('//*[@id="ui-id-3"]/ul/li[3]/span')
-    webdriver.ActionChains(driver).move_to_element(text_label_tree).click(text_label_tree_2).perform()
-    time.sleep(1)
-
     driver.switch_to.default_content()
-
     info_frame = driver.find_element_by_id('_OSPVisualizing_analyzer_DataInfo_INSTANCE_LAYOUT_canvas')
     driver.switch_to.frame(info_frame)
 
@@ -264,10 +251,6 @@ def iv(DIR, iv_img):
         time.sleep(1)
         iv_tree = driver.find_element_by_xpath('//*[@id="ui-id-2"]/ul/li[3]/span/span[2]')
         webdriver.ActionChains(driver).move_to_element(iv_tree).click(iv_tree).perform()
-
-        time.sleep(1)
-        iv_tree_2 = driver.find_element_by_xpath('//*[@id="ui-id-3"]/ul/li[5]/span')
-        webdriver.ActionChains(driver).move_to_element(iv_tree_2).click(iv_tree_2).perform()
 
         time.sleep(1)
         driver.switch_to.default_content()
@@ -340,7 +323,7 @@ def endurance(DIR, endurance_img):
 
         time.sleep(1)
         buttons = driver.find_elements_by_tag_name('button')
-        ActionChains(driver).move_to_element(buttons[2]).click(buttons[2]).perform()
+        ActionChains(driver).move_to_element(buttons[0]).click(buttons[0]).perform()
 
         # 이미지 올리기
         print(f'{DIR}/{endurance_img[i]}')
@@ -351,7 +334,7 @@ def endurance(DIR, endurance_img):
         driver.switch_to.frame(input_frame)
 
         # 데이터 입력 폼
-        time.sleep(3)
+        time.sleep(1)
         input_space = driver.find_elements_by_css_selector("input[type='text']")
 
         for j in range(0, max_row-1):
@@ -368,10 +351,10 @@ def endurance(DIR, endurance_img):
         driver.switch_to.frame(info_frame)
 
         save_btn = driver.find_elements_by_tag_name('button')
-        ActionChains(driver).move_to_element(save_btn[3]).click(save_btn[3]).perform()
+        ActionChains(driver).move_to_element(save_btn[1]).click(save_btn[1]).perform()
         print(f'{i+1}번째 endurance 이미지 done')
-        time.sleep(3)
-    time.sleep(3)
+        time.sleep(1)
+    time.sleep(1)
     print("endurance done")
 
 def retention(DIR, retention_img):
@@ -405,7 +388,7 @@ def retention(DIR, retention_img):
         # hit the button
         time.sleep(1)
         buttons = driver.find_elements_by_tag_name('button')
-        ActionChains(driver).move_to_element(buttons[2]).click(buttons[2]).perform()
+        ActionChains(driver).move_to_element(buttons[0]).click(buttons[0]).perform()
 
         # 이미지 올리기
         time.sleep(1)
@@ -418,7 +401,7 @@ def retention(DIR, retention_img):
         driver.switch_to.frame(input_frame)
 
         # 데이터 입력 폼
-        time.sleep(2)
+        time.sleep(1)
         input_space = driver.find_elements_by_css_selector("input[type='text']")
 
         for j in range(0, max_row-1):
@@ -435,10 +418,10 @@ def retention(DIR, retention_img):
         driver.switch_to.frame(info_frame)
 
         save_btn = driver.find_elements_by_tag_name('button')
-        ActionChains(driver).move_to_element(save_btn[3]).click(save_btn[3]).perform()
+        ActionChains(driver).move_to_element(save_btn[1]).click(save_btn[1]).perform()
         print(f'{i+1}번째 retention 완료')
-        time.sleep(3)
-    time.sleep(3)
+        time.sleep(1)
+    time.sleep(1)
     print("retention 완료")
 
 def device(DIR, device_img):
@@ -465,16 +448,18 @@ def device(DIR, device_img):
         webdriver.ActionChains(driver).move_to_element(device_tree).click(device_tree).perform()
 
         time.sleep(1)
-        driver.switch_to.default_content()
+        device_tree_2 = driver.find_element_by_xpath('//*[@id="ui-id-3"]/ul/li[3]/span')
+        webdriver.ActionChains(driver).move_to_element(device_tree_2).click(device_tree_2).perform()
 
         time.sleep(1)
+        driver.switch_to.default_content()
         info_frame = driver.find_element_by_id('_OSPVisualizing_analyzer_DataInfo_INSTANCE_LAYOUT_canvas')
         driver.switch_to.frame(info_frame)
 
         # hit the entry button
         time.sleep(1)
         buttons = driver.find_elements_by_tag_name('button')
-        ActionChains(driver).move_to_element(buttons[2]).click(buttons[2]).perform()
+        ActionChains(driver).move_to_element(buttons[0]).click(buttons[0]).perform()
 
         # 이미지 올리기
         print(f'{DIR}/{device_img[i]}')
@@ -501,9 +486,9 @@ def device(DIR, device_img):
         driver.switch_to.frame(info_frame)
 
         save_btn = driver.find_elements_by_tag_name('button')
-        ActionChains(driver).move_to_element(save_btn[3]).click(save_btn[3]).perform()
+        ActionChains(driver).move_to_element(save_btn[1]).click(save_btn[1]).perform()
         print(f'{i+1}번째 device 완료')
-    time.sleep(3)
+    time.sleep(1)
     print("device 완료")
 
 options = webdriver.ChromeOptions()
